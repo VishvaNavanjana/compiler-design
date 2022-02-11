@@ -44,7 +44,7 @@ extern YYSTYPE cool_yylval;
  *  Add Your own definitions here
  */
 
- bool containNullCharStr;
+ bool containNullCharStr = false;
  char stringConst[MAX_STR_CONST];
  int stringConstLen;
 
@@ -59,7 +59,7 @@ extern YYSTYPE cool_yylval;
  */
 
 %option noyywrap
-%x LINE_COMMENT BLOCK_COMMENT STRING
+%x LINE_COMMENT BLOCK_COMMENT STRING INVALID_STRING
 
 DARROW          =>
 ASSIGN          <-
@@ -85,8 +85,8 @@ WHITESPACE [ \t\r\v\f]+
   */
 
 "--"      { BEGIN LINE_COMMENT; }
-"(\*"     { BEGIN BLOCK_COMMENT; }
-"\*)" {
+"(*"     { BEGIN BLOCK_COMMENT; }
+"*)" {
   strcpy(cool_yylval.error_msg, "Unmatched *)");
   return (ERROR);
 }
@@ -190,6 +190,17 @@ f(?i:alse)		{
   return (BOOL_CONST);
 }
 
+ /*
+  * Handling the exceeded stringth
+  */
+
+<INVALID_STRING>\" {
+  BEGIN 0;
+}
+
+<INVALID_STRING>. {
+  
+}
 
 
 
@@ -213,17 +224,17 @@ f(?i:alse)		{
 
  /* EOF found middle of a string */
 <STRING><<EOF>> {
-  strcpy(cool_yylval.error_msg, "EOF in string constant");
+  cool_yylval.error_msg = "EOF in string constant";
   BEGIN 0;
-  return (ERROR);
+  return ERROR;
 }
 
 
 <STRING>\\. {
 
   if(stringConstLen >= MAX_STR_CONST){
-    strcpy(cool_yylval.error_msg, "String constant too long");
-    BEGIN 0;
+    cool_yylval.error_msg = "String constant too long";
+    BEGIN INVALID_STRING;
     return (ERROR);
   }
 
@@ -231,9 +242,6 @@ f(?i:alse)		{
 
     case '\"':
       stringConst[stringConstLen++] = '\"';
-      break;
-    case '\\':
-      stringConst[stringConstLen++] = '\\';
       break;
     case 'b':
       stringConst[stringConstLen++] = '\b';
@@ -258,24 +266,20 @@ f(?i:alse)		{
 
 }
 
- /* found '\\' at the end of a line */
-<STRING>\\\n {
-  curr_lineno++;
-}
 
  /*found newline charactor middle of a string*/
 
 <STRING>\n {
   curr_lineno++;
-  strcpy(cool_yylval.error_msg, "Unterminated string constant");
+  cool_yylval.error_msg = "Unterminated string constant";
   BEGIN 0;
-  return ERROR;
+  return (ERROR);
 }
 
 <STRING>\" {
 
-  if(stringConstLen > 1 && containNullCharStr){
-    strcpy(cool_yylval.error_msg, "String contains null character");
+  if(stringConstLen > 1 && containNullCharStr ){
+    cool_yylval.error_msg = "String contains null character";
     BEGIN 0;
     return (ERROR);
   }
@@ -289,8 +293,8 @@ f(?i:alse)		{
 <STRING>. {
 
   if(stringConstLen >= MAX_STR_CONST) {
-    strcpy(cool_yylval.error_msg, "String constant too long");
-    BEGIN 0;
+    cool_yylval.error_msg = "String constant too long";
+    BEGIN INVALID_STRING;
     return (ERROR);
   }
 
@@ -321,7 +325,7 @@ f(?i:alse)		{
 
 
 .	{
-  strcpy(cool_yylval.error_msg, yytext);
+  cool_yylval.error_msg = yytext;
   return (ERROR);
 }
  
