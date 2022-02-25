@@ -106,3 +106,46 @@ Instructions
 Write-up for PA2
 ----------------
 
+Regular Expressions -
+
+WHITESPACE [ \t\r\v\f]+   = White space consists of any sequence of characters such as blank,new line(\n), carriage return (\r) , tab (\t) , form feed(\f), vertical tab(\v).
+We have to ignore all these characters except newline(\n).We can't ignore newline characters since we need it to count line numbers.
+
+Comments
+
+In Cool, line comments start with two dashes --,
+And the comments can be nested starting with (* and ending with *)
+If an EOF is encountered while the comment is open, that error will be reported with the message “EOF in comment”.
+If *) is encountered outside a comment, this error is reported as “Unmatched *)”.
+It will not tokenize that as * and ).
+
+
+Operators 
+There are two types of operators 
+Single character operators
+Multiple character operators
+
+We must return these operators as it is.
+
+Identifiers
+Identifiers in Cool are strings
+Type identifiers begin with a capital letter 
+Object identifiers begin with a lowercase letter
+
+Others 
+Return an error with this token
+
+
+Keywords
+Keywords in Cool - CLASS, IF, ELSE, FI, IN, INHERITS, LET, LOOP, POOL, THEN, WHILE, CASE, ESAC, OF, NEW, LE, NOT, ISVOID. These keywords are case insensitive.
+In TRUE or FALSE the first letter of true and false must be lower case. Following letters are case insensitive.
+
+
+Strings
+In Cool even single characters are also considered as strings. So as usual strings are enclosed “ ”.
+If an EOF error is encountered before the closing quote, that error is reported as “EOF in string constant”.
+If the length of the string exceeds the MAX_STR_CONST, that error is reported as “String constant too long”.
+If a null character is encountered in a string, we set the containNullCharStr to true and an error is reported with the message “String contains null character”. 
+If a string contains an unescaped newline, that error is reported as "Unterminated string constant".
+
+
