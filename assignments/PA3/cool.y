@@ -133,6 +133,20 @@
     %type <program> program
     %type <classes> class_list
     %type <class_> class
+    %type <formals> formal_list
+    %type <formals> nonempty_formal_list
+    %type <formal> formal
+    %type <expression> expression
+    %type <expressions> expression_list
+    %type <expressions> nonempty_block
+    %type <cases> case_list
+    %type <case_> branch
+    %type <expression> inner_let
+    %type <expression> nonempty_expr
+    %type <features> feature_list
+    %type <features> nonempty_feature_list
+    %type <feature> feature
+    %type <expression> while_exp
     
     /* You will want to change the following line. */
     %type <features> dummy_feature_list
