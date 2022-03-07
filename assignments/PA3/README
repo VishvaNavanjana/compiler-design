@@ -1,3 +1,6 @@
+
+
+
 README file for Programming Assignment 3 (C++ edition)
 ======================================================
 
@@ -130,3 +133,84 @@ Instructions
 
 Write-up for PA3
 ----------------
+
+We have declared the following Non-terminals
+
+%type <formals> formal_list
+%type <formal> formal
+%type <cases> case_list
+%type <case_> case
+%type <expressions> expression_list1
+%type <expressions> expression_list2
+%type <expression> expression
+%type <expression> let
+%type <expression> optional_assign
+
+Precedence declarations have been done according to the Cool Manual.
+       .
+       @
+       ~
+       ISVOID
+       *   /
+       +  -
+       <  = 
+       not
+       <-
+
+
+GRAMMAR
+
+Definition for program was already implemented in the skelton code as a class list.
+
+Class_list can contain single or multiple classes.If there are several classes pass to append_Classes( ).
+
+There are two types of classes 
+parent is not specified - this type of class should be inherited from the Object class.To do that class “Object” is added to the idtable.
+parent is specified 
+
+
+Features are the methods and attributes.
+Methods are defined as 
+	OBJECTID ( formal_list ) : TYPEID { expression } ;
+
+Formals are the parameters for the methods
+defined as	 OBJECTID : TYPEID 
+
+Formal_list can be empty,one formal or multiple formals.
+
+There are multiple types of expressions 
+Expression can be empty,single or multiple expressions.
+
+We referred to the expressions using the cool-manual. Some of those expressions are,
+OBJECTID
+OBJECTID ASSIGN expression
+BOOL_CONST
+INT_CONST
+STR_CONST 
+
+
+Error Handling
+
+The next class definition will be restarted only if there is an error in the current class definition and also the next class is syntactically correct.
+
+Testing
+
+We tested the good.cl file and it finished executing without errors.
+
+While testing the default bad.cl file we came up with these errors.
+
+"bad.cl", line 15: syntax error at or near OBJECTID = b
+"bad.cl", line 19: syntax error at or near OBJECTID = a
+"bad.cl", line 23: syntax error at or near OBJECTID = inherts
+"bad.cl", line 28: syntax error at or near ';'
+
+And we changed the bad.cl file and tested. We came up with these errors.
+
+"bad.cl", line 15: syntax error at or near OBJECTID = b
+"bad.cl", line 19: syntax error at or near OBJECTID = a
+"bad.cl", line 23: syntax error at or near OBJECTID = inherts
+"bad.cl", line 28: syntax error at or near ';'
+"bad.cl", line 36: syntax error at or near '<'
+"bad.cl", line 36: syntax error at or near '<'
+"bad.cl", line 37: syntax error at or near '}'
+
