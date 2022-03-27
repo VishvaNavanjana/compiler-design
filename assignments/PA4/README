@@ -164,3 +164,61 @@ Instructions
 
 Write-up for PA4
 ----------------
+
+We have included Class,Method,Attribute,Dispatch,Assign,Case/Branch,Conditions and Loop,Let, etc in type checking for Cool.
+
+### Class
+In the class table we added 5 basic classes.
+* Object
+* IO
+* Str
+* Bool
+* Int 
+
+We check whether there is Main class and  main method defined. We check whether there is a redefinition of a class or  a method. We check whether the parent class exists when a subclass is inherited from it.
+
+### Method
+We check if the return type is defined in the method. We don't expect  redefinitions of formal parameters in a method.When a class tries to override an ancestor class's inherited method, make sure the number of arguments, the types of the formal parameters, and the return type are all the same.
+
+
+### Dispatch
+
+We expect the expression type and method to be defined. The number of arguments should be matched when we are calling methods.Verify that the declared static dispatch type exists.
+
+### Attribute
+We check whether the declared type of attribute is defined.
+
+### Assign
+Check whether the identifier is declared.
+Check to see if the type of the assigned expression matches the declared type of identifier.
+
+### Conditions
+We observe that the implemented condtion has type Bool.
+
+### Case/Branch
+We don't expect a branch to be duplicated
+
+### New 
+Undefined class cannot use the new keyword.
+
+#### Testing the Semantic Analyzer
+* bad_main.cl 
+*bad_examples/bad_main.cl:1: No 'main' method in class Main.
+Compilation halted due to static semantic errors.*
+
+* bad_Main_.cl 
+*Class Main is not defined.
+Compilation halted due to static semantic errors.*
+
+* bad_inheritance.cl
+*bad_examples/bad_inheritance.cl:1: Class Sample1 cannot inherit class Int.
+bad_examples/bad_inheritance.cl:3: Class Sample3 cannot inherit class String.
+bad_examples/bad_inheritance.cl:4: Class Sample4 inherits from an undefined class No_class.
+Compilation halted due to static semantic errors.*
+
+* bad_override.cl
+*bad_examples/bad_override.cl:16: Type Bool of assigned expression does not conform to declared type Int of identifier a.
+bad_examples/bad_override.cl:14: In redefined method add, parameter type Bool is different from original type Int.
+bad_examples/bad_override.cl:24: Incompatible number of formal parameters in redefined method add.
+bad_examples/bad_override.cl:34: In redefined method add, return type Bool is different from original return type Int.
+Compilation halted due to static semantic errors.*
