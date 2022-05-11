@@ -11,7 +11,9 @@
 
 #include "tree.h"
 #include "cool-tree.handcode.h"
+#include <vector>
 
+class Environment;
 
 // define the class for phylum
 // define simple phylum - Program
@@ -19,7 +21,7 @@ typedef class Program_class *Program;
 
 class Program_class : public tree_node {
 public:
-   tree_node *copy()		 { return copy_Program(); }
+   tree_node *copy()     { return copy_Program(); }
    virtual Program copy_Program() = 0;
 
 #ifdef Program_EXTRAS
@@ -33,7 +35,7 @@ typedef class Class__class *Class_;
 
 class Class__class : public tree_node {
 public:
-   tree_node *copy()		 { return copy_Class_(); }
+   tree_node *copy()     { return copy_Class_(); }
    virtual Class_ copy_Class_() = 0;
 
 #ifdef Class__EXTRAS
@@ -47,9 +49,9 @@ typedef class Feature_class *Feature;
 
 class Feature_class : public tree_node {
 public:
-   tree_node *copy()		 { return copy_Feature(); }
+   tree_node *copy()     { return copy_Feature(); }
    virtual Feature copy_Feature() = 0;
-
+   virtual bool IsMethod() = 0;
 #ifdef Feature_EXTRAS
    Feature_EXTRAS
 #endif
@@ -61,9 +63,9 @@ typedef class Formal_class *Formal;
 
 class Formal_class : public tree_node {
 public:
-   tree_node *copy()		 { return copy_Formal(); }
+   tree_node *copy()     { return copy_Formal(); }
    virtual Formal copy_Formal() = 0;
-
+   virtual Symbol GetName() = 0;
 #ifdef Formal_EXTRAS
    Formal_EXTRAS
 #endif
@@ -75,9 +77,9 @@ typedef class Expression_class *Expression;
 
 class Expression_class : public tree_node {
 public:
-   tree_node *copy()		 { return copy_Expression(); }
+   tree_node *copy()     { return copy_Expression(); }
    virtual Expression copy_Expression() = 0;
-
+   virtual bool IsEmpty() { return false; }
 #ifdef Expression_EXTRAS
    Expression_EXTRAS
 #endif
@@ -89,7 +91,7 @@ typedef class Case_class *Case;
 
 class Case_class : public tree_node {
 public:
-   tree_node *copy()		 { return copy_Case(); }
+   tree_node *copy()     { return copy_Case(); }
    virtual Case copy_Case() = 0;
 
 #ifdef Case_EXTRAS
@@ -127,7 +129,7 @@ typedef Cases_class *Cases;
 // define the class for constructors
 // define constructor - program
 class program_class : public Program_class {
-protected:
+public:
    Classes classes;
 public:
    program_class(Classes a1) {
@@ -144,10 +146,11 @@ public:
 #endif
 };
 
+class attr_class;
 
 // define constructor - class_
 class class__class : public Class__class {
-protected:
+public:
    Symbol name;
    Symbol parent;
    Features features;
@@ -170,10 +173,11 @@ public:
 #endif
 };
 
+class CgenNode;
 
 // define constructor - method
 class method_class : public Feature_class {
-protected:
+public:
    Symbol name;
    Formals formals;
    Symbol return_type;
@@ -187,7 +191,15 @@ public:
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
-
+   bool IsMethod() { return true; }
+   void code(ostream& stream, CgenNode* class_node);
+   int GetArgNum() {
+      int ret = 0;
+      for (int i = formals->first(); formals->more(i); i = formals->next(i)) {
+         ++ret;
+      }
+      return ret;
+   }
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
 #endif
@@ -199,7 +211,7 @@ public:
 
 // define constructor - attr
 class attr_class : public Feature_class {
-protected:
+public:
    Symbol name;
    Symbol type_decl;
    Expression init;
@@ -211,7 +223,7 @@ public:
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
-
+   bool IsMethod() { return false; }
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
 #endif
@@ -223,7 +235,7 @@ public:
 
 // define constructor - formal
 class formal_class : public Formal_class {
-protected:
+public:
    Symbol name;
    Symbol type_decl;
 public:
@@ -233,7 +245,7 @@ public:
    }
    Formal copy_Formal();
    void dump(ostream& stream, int n);
-
+   Symbol GetName() { return name; }
 #ifdef Formal_SHARED_EXTRAS
    Formal_SHARED_EXTRAS
 #endif
@@ -245,7 +257,7 @@ public:
 
 // define constructor - branch
 class branch_class : public Case_class {
-protected:
+public:
    Symbol name;
    Symbol type_decl;
    Expression expr;
@@ -269,7 +281,7 @@ public:
 
 // define constructor - assign
 class assign_class : public Expression_class {
-protected:
+public:
    Symbol name;
    Expression expr;
 public:
@@ -291,7 +303,7 @@ public:
 
 // define constructor - static_dispatch
 class static_dispatch_class : public Expression_class {
-protected:
+public:
    Expression expr;
    Symbol type_name;
    Symbol name;
@@ -305,7 +317,13 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
-
+   std::vector<Expression> GetActuals() {
+      std::vector<Expression> ret;
+      for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
+         ret.push_back(actual->nth(i));
+      }
+      return ret;
+   }
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -317,7 +335,7 @@ public:
 
 // define constructor - dispatch
 class dispatch_class : public Expression_class {
-protected:
+public:
    Expression expr;
    Symbol name;
    Expressions actual;
@@ -329,7 +347,13 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
-
+   std::vector<Expression> GetActuals() {
+      std::vector<Expression> ret;
+      for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
+         ret.push_back(actual->nth(i));
+      }
+      return ret;
+   }
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -341,7 +365,7 @@ public:
 
 // define constructor - cond
 class cond_class : public Expression_class {
-protected:
+public:
    Expression pred;
    Expression then_exp;
    Expression else_exp;
@@ -365,7 +389,7 @@ public:
 
 // define constructor - loop
 class loop_class : public Expression_class {
-protected:
+public:
    Expression pred;
    Expression body;
 public:
@@ -387,7 +411,7 @@ public:
 
 // define constructor - typcase
 class typcase_class : public Expression_class {
-protected:
+public:
    Expression expr;
    Cases cases;
 public:
@@ -397,7 +421,13 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
-
+   std::vector<branch_class*> GetCases() {
+      std::vector<branch_class*> ret;
+      for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
+         ret.push_back((branch_class*)cases->nth(i));
+      }
+      return ret;
+   }
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -409,7 +439,7 @@ public:
 
 // define constructor - block
 class block_class : public Expression_class {
-protected:
+public:
    Expressions body;
 public:
    block_class(Expressions a1) {
@@ -429,7 +459,7 @@ public:
 
 // define constructor - let
 class let_class : public Expression_class {
-protected:
+public:
    Symbol identifier;
    Symbol type_decl;
    Expression init;
@@ -455,7 +485,7 @@ public:
 
 // define constructor - plus
 class plus_class : public Expression_class {
-protected:
+public:
    Expression e1;
    Expression e2;
 public:
@@ -477,7 +507,7 @@ public:
 
 // define constructor - sub
 class sub_class : public Expression_class {
-protected:
+public:
    Expression e1;
    Expression e2;
 public:
@@ -499,7 +529,7 @@ public:
 
 // define constructor - mul
 class mul_class : public Expression_class {
-protected:
+public:
    Expression e1;
    Expression e2;
 public:
@@ -521,7 +551,7 @@ public:
 
 // define constructor - divide
 class divide_class : public Expression_class {
-protected:
+public:
    Expression e1;
    Expression e2;
 public:
@@ -543,7 +573,7 @@ public:
 
 // define constructor - neg
 class neg_class : public Expression_class {
-protected:
+public:
    Expression e1;
 public:
    neg_class(Expression a1) {
@@ -563,7 +593,7 @@ public:
 
 // define constructor - lt
 class lt_class : public Expression_class {
-protected:
+public:
    Expression e1;
    Expression e2;
 public:
@@ -585,7 +615,7 @@ public:
 
 // define constructor - eq
 class eq_class : public Expression_class {
-protected:
+public:
    Expression e1;
    Expression e2;
 public:
@@ -607,7 +637,7 @@ public:
 
 // define constructor - leq
 class leq_class : public Expression_class {
-protected:
+public:
    Expression e1;
    Expression e2;
 public:
@@ -629,7 +659,7 @@ public:
 
 // define constructor - comp
 class comp_class : public Expression_class {
-protected:
+public:
    Expression e1;
 public:
    comp_class(Expression a1) {
@@ -649,7 +679,7 @@ public:
 
 // define constructor - int_const
 class int_const_class : public Expression_class {
-protected:
+public:
    Symbol token;
 public:
    int_const_class(Symbol a1) {
@@ -669,7 +699,7 @@ public:
 
 // define constructor - bool_const
 class bool_const_class : public Expression_class {
-protected:
+public:
    Boolean val;
 public:
    bool_const_class(Boolean a1) {
@@ -689,7 +719,7 @@ public:
 
 // define constructor - string_const
 class string_const_class : public Expression_class {
-protected:
+public:
    Symbol token;
 public:
    string_const_class(Symbol a1) {
@@ -709,7 +739,7 @@ public:
 
 // define constructor - new_
 class new__class : public Expression_class {
-protected:
+public:
    Symbol type_name;
 public:
    new__class(Symbol a1) {
@@ -729,7 +759,7 @@ public:
 
 // define constructor - isvoid
 class isvoid_class : public Expression_class {
-protected:
+public:
    Expression e1;
 public:
    isvoid_class(Expression a1) {
@@ -749,13 +779,13 @@ public:
 
 // define constructor - no_expr
 class no_expr_class : public Expression_class {
-protected:
+public:
 public:
    no_expr_class() {
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
-
+   bool IsEmpty() { return true; }
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -767,7 +797,7 @@ public:
 
 // define constructor - object
 class object_class : public Expression_class {
-protected:
+public:
    Symbol name;
 public:
    object_class(Symbol a1) {
